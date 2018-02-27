@@ -18,7 +18,8 @@ float LCL;
 float UCL;
 float salinityReading;
 float F = 0.15;
-float G = 0.80;
+float GDI = 0.80;
+float GSalt = 0.60;
 float massInTank = 113.0;
 float salt_flowrate = 6.80;
 float DI_flowrate = 6.74;
@@ -44,7 +45,7 @@ void loop() {
   LCDUpdate();
   if (millis()-last_salinity_update > deadtime) {
     if ( salinityReading>UCL ) {
-      DIOpenTime = (massInTank*((G*(setpoint-salinityReading))/((1-F)*(0-salinityReading))))/DI_flowrate;
+      DIOpenTime = (massInTank*((GDI*(setpoint-salinityReading))/((1-F)*(0-salinityReading))))/DI_flowrate;
       cTime = millis();
       digitalWrite(solDI_pin, HIGH); 
       for (unsigned long i = millis(); i < (cTime + (DIOpenTime*1000)); i = millis())
@@ -60,7 +61,7 @@ void loop() {
       last_salinity_update = millis();
     }
     if ( salinityReading<LCL ) {
-      saltOpenTime = (massInTank*((G*(setpoint-salinityReading))/((1-F)*(1-salinityReading))))/salt_flowrate;
+      saltOpenTime = (massInTank*((GSalt*(setpoint-salinityReading))/((1-F)*(1-salinityReading))))/salt_flowrate;
       cTime = millis();
       digitalWrite(solSalt_pin, HIGH); 
       for (unsigned long i = millis(); i < (cTime + (saltOpenTime*1000)); i = millis())
