@@ -19,7 +19,7 @@ float UCL;
 float salinityReading;
 float F = 0.15;
 float G = 0.80;
-float massInTank = 106.0;
+float massInTank = 113.0;
 float salt_flowrate = 6.80;
 float DI_flowrate = 6.74;
 float deadtime = 6000.0;
@@ -109,7 +109,7 @@ float salinity_value(int reading) {
 void setDeadband() {
   setpointReading = analogRead(setpointPotPin);
   setpointReading = constrain(setpointReading, 5, 987);
-  setpointReading = map(setpointReading, 5, 987, 570, 646);
+  setpointReading = map(setpointReading, 5, 987, 0, 570);
   setpoint = salinity_value(setpointReading);
   LCL = salinity_value(setpointReading-(sigma*3));
   UCL = salinity_value(setpointReading+(sigma*3));
