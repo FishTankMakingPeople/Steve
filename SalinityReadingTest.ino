@@ -22,8 +22,9 @@ float G = 0.80;
 float massInTank = 106.0;
 float salt_flowrate = 6.80;
 float DI_flowrate = 6.74;
-float deadtime = 6.0;
+float deadtime = 6000.0;
 unsigned long last_salinity_update;
+unsigned long cTime;
 float DIOpenTime;
 float saltOpenTime; 
 
@@ -43,24 +44,35 @@ void loop() {
   LCDUpdate();
   if (millis()-last_salinity_update > deadtime) {
     if ( salinityReading>UCL ) {
-      LCDSerial.write(254);
-      LCDSerial.write(229);
-      LCDSerial.write("ON ");
-      digitalWrite(solDI_pin, HIGH); 
       DIOpenTime = (massInTank*((G*(setpoint-salinityReading))/((1-F)*(0-salinityReading))))/DI_flowrate;
-      Serial.print(setpoint,4); Serial.print(" ");
-      Serial.print(salinityReading,4); Serial.print(" ");
-      Serial.println(DIOpenTime);    
+      cTime = millis();
+      digitalWrite(solDI_pin, HIGH); 
+      for (unsigned long i = millis(); i < (cTime + (DIOpenTime*1000)); i = millis())
+      { 
+        LCDSerial.write(254);
+        LCDSerial.write(229);
+        LCDSerial.write("ON ");
+        setDeadband();
+        salinityReading = salinity_value(sensor_reading( salinity_power_pin, salinity_input_pin ));
+        LCDUpdate();
+      }
+      digitalWrite(solDI_pin, LOW);    
       last_salinity_update = millis();
     }
     if ( salinityReading<LCL ) {
-      LCDSerial.write(254);
-      LCDSerial.write(213);
-      LCDSerial.write("ON ");
-      saltOpenTime = (massInTank*((G*(setpoint-salinityReading))/((1-F)*(1-salinityReading))))/DI_flowrate;
-      Serial.print(setpoint,4); Serial.print(" ");
-      Serial.print(salinityReading,4); Serial.print(" ");
-      Serial.println(saltOpenTime);       
+      saltOpenTime = (massInTank*((G*(setpoint-salinityReading))/((1-F)*(1-salinityReading))))/salt_flowrate;
+      cTime = millis();
+      digitalWrite(solSalt_pin, HIGH); 
+      for (unsigned long i = millis(); i < (cTime + (saltOpenTime*1000)); i = millis())
+      { 
+        LCDSerial.write(254);
+        LCDSerial.write(213);
+        LCDSerial.write("ON ");
+        setDeadband();
+        salinityReading = salinity_value(sensor_reading( salinity_power_pin, salinity_input_pin ));
+        LCDUpdate();
+      }
+      digitalWrite(solSalt_pin, LOW);    
       last_salinity_update = millis();
     }
   }
