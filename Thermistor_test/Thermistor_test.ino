@@ -52,7 +52,7 @@ void loop()
       sum = sum + reading[i];      
     }
     float average = sum / reading_ave;
-    float tempC = (((.000087188130*pow(average,2))-(.027187059*average)-12.705983)-32)*(5/9);
+    float tempC = (((.000087188130*pow(average,2))-(.027187059*average)-12.705983)-32.0)*(5.0/9.0);
     return tempC;
   }
   
