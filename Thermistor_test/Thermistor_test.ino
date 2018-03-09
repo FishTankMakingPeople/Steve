@@ -12,7 +12,7 @@ void setup()
 void loop()
 {
   int heater_status;
-  int nave = 60, reading;
+  int nave = 30, reading;
   long heater_start = 15000, heater_stop = 75000, now;
   float T;
   long start_time = millis();
