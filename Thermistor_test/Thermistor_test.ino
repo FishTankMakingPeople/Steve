@@ -1,6 +1,7 @@
 int thermistor_power_pin = 6;
 int thermistor_input_pin = A5;
 int heater_power_pin = 8;
+long start_time = millis();
 
 void setup()
 {
@@ -15,7 +16,6 @@ void loop()
   int nave = 30, reading;
   long heater_start = 15000, heater_stop = 75000, now;
   float T;
-  long start_time = millis();
   
   now = millis() - start_time;
 
