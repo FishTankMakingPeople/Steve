@@ -100,7 +100,7 @@ void loop() {
       HeatOnTimer = millis();
       HeaterOn = true;      
     } 
-  else if ( (HeaterOn && millis()-HeatOnTimer >= heaterOnTime) || (HeaterOn && abs(HeaterCurrCycleSetpoint-setpointTemp) >= 0.3) ) {
+  else if ( (HeaterOn && millis()-HeatOnTimer >= heaterOnTime) || (HeaterOn && abs(HeaterCurrCycleSetpoint-setpointTemp) >= 0.3) || (HeaterOn && tempReading >= setpointTemp) ) {
     digitalWrite(heater_power_pin, LOW);
     HeaterOn = false;
   }
@@ -162,7 +162,7 @@ void LCDUpdate() {
   LCDSerial.write("Salt% DI Temp Heat");
   LCDSerial.write(254);
   LCDSerial.write(148);
-  LCDSerial.write("Set   1% Set  Cycle"); 
+  LCDSerial.write("Set   1% Set"); 
   dtostrf(salinityReading,4,2,salinitystring);
   dtostrf(setpointSalinity,4,2,salinitySetpointstring);  
   LCDSerial.write(254);
@@ -203,12 +203,7 @@ void LCDUpdate() {
   }
   else {
     LCDSerial.write("OFF");
-  }
-  if ((HeaterOn && millis()-HeatOnTimer-heaterOnTime)/-1000 > 0) {
-    LCDSerial.write(254);
-    LCDSerial.write(226);
-    LCDSerial.write(tempCyclestring);
-  }  
+  } 
   /*LCDSerial.write(254);
   LCDSerial.write(128);
   LCDSerial.write("  LCL  SetPt");
