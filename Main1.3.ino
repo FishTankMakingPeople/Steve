@@ -48,6 +48,7 @@ boolean HeaterOn = false;
 float DIOpenTimer;
 float SaltOpenTimer;
 float HeatOnTimer;
+float HeaterCurrCycleSetpoint;
 
 void setup() {
   Serial.begin(9600);
@@ -92,13 +93,14 @@ void loop() {
          last_salinity_update = millis();         
        }
   if ( !HeaterOn && tempReading<LCLTemp ) {
+      HeaterCurrCycleSetpoint = setpointTemp;
       heaterOnTime = (setpointTemp-tempReading)/K;
       Serial.print(setpointTemp); Serial.print(" "); Serial.print(tempReading); Serial.print(" "); Serial.println(heaterOnTime);   
       digitalWrite(heater_power_pin, HIGH);
       HeatOnTimer = millis();
       HeaterOn = true;      
     } 
-  else if ( HeaterOn && millis()-HeatOnTimer >= heaterOnTime ) {
+  else if ( (HeaterOn && millis()-HeatOnTimer >= heaterOnTime) || (HeaterOn && abs(HeaterCurrCycleSetpoint-setpointTemp) >= 0.3) ) {
     digitalWrite(heater_power_pin, LOW);
     HeaterOn = false;
   }
@@ -202,7 +204,7 @@ void LCDUpdate() {
   else {
     LCDSerial.write("OFF");
   }
-  if ((millis()-HeatOnTimer-heaterOnTime)/-1000 > 0) {
+  if ((HeaterOn && millis()-HeatOnTimer-heaterOnTime)/-1000 > 0) {
     LCDSerial.write(254);
     LCDSerial.write(226);
     LCDSerial.write(tempCyclestring);
