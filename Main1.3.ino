@@ -9,7 +9,6 @@ char salinityUCLstring[20];
 char tempstring[20];
 char tempSetpointstring[20];
 char tempLCLstring[20];
-char tempCyclestring[20];
 int salinity_power_pin = 7;
 int thermistor_power_pin = 6;
 int heater_power_pin = 8;
@@ -70,7 +69,6 @@ void loop() {
   if ( !DIOpen && !SaltOpen && millis()-last_salinity_update >= deadtimeSalinity ) {
     if ( salinityReading>UCLSalinity ) {
       DIOpenTime = ((massInTank*((GDI*(setpointSalinity-salinityReading))/((1-F)*(0-salinityReading))))/DI_flowrate)*1000;
-      //Serial.print(millis()); Serial.print(" "); Serial.println(DIOpenTime);
       digitalWrite(solDI_pin, HIGH);
       DIOpenTimer = millis();
       DIOpen = true;
@@ -94,13 +92,13 @@ void loop() {
        }
   if ( !HeaterOn && tempReading<LCLTemp ) {
       HeaterCurrCycleSetpoint = setpointTemp;
-      heaterOnTime = (setpointTemp-tempReading)/K;
-      Serial.print(setpointTemp); Serial.print(" "); Serial.print(tempReading); Serial.print(" "); Serial.println(heaterOnTime);   
+      heaterOnTime = (setpointTemp-tempReading)/K; 
       digitalWrite(heater_power_pin, HIGH);
       HeatOnTimer = millis();
       HeaterOn = true;      
     } 
-  else if ( (HeaterOn && millis()-HeatOnTimer >= heaterOnTime) || (HeaterOn && abs(HeaterCurrCycleSetpoint-setpointTemp) >= 0.3) || (HeaterOn && tempReading >= setpointTemp) ) {
+  else if ( (HeaterOn && millis()-HeatOnTimer >= heaterOnTime)
+  || (HeaterOn && abs(HeaterCurrCycleSetpoint-setpointTemp) >= 0.3) || (HeaterOn && tempReading >= setpointTemp) ) {
     digitalWrite(heater_power_pin, LOW);
     HeaterOn = false;
   }
@@ -113,12 +111,10 @@ int sensor_reading( int power_pin, int input_pin ) {
   reading = analogRead (input_pin ); // Read voltage
   digitalWrite (power_pin, LOW ); // Turn off the sensor
   delay(100); // Wait to settle
-  //Serial.print(reading); Serial.print(" ");
   return reading;
 }
 
 float salinity_value(int reading) {
- //Serial.println(reading);
  int rbreak = 506; // separation between linear segments
  int rlimit = 1023; // upper limit of acceptable readings
  float salinity; // Compute salinity from calibration equations
@@ -131,12 +127,10 @@ float salinity_value(int reading) {
  } else {
  // do something to be safe
  }
- //Serial.println(salinity);
  return(salinity);
 }
 
 float temperature_value(int reading) {
-  //Serial.println(reading);
   float temperature = (.000087188130*pow(reading,2))+(.027187059*reading)-12.705983;
   return(temperature);
 }
@@ -190,8 +184,7 @@ void LCDUpdate() {
     LCDSerial.write("OFF");
   }
   dtostrf(tempReading,4,1,tempstring);
-  dtostrf(setpointTemp,4,1,tempSetpointstring);
-  dtostrf((millis()-HeatOnTimer-heaterOnTime)/-1000,3,0,tempCyclestring);  
+  dtostrf(setpointTemp,4,1,tempSetpointstring); 
   LCDSerial.write(254);
   LCDSerial.write(201);
   LCDSerial.write(tempstring);
@@ -245,8 +238,7 @@ void LCDUpdate() {
   dtostrf(salinityReading,6,4,salinitystring);
   dtostrf(setpointSalinity,6,4,salinitySetpointstring);
   dtostrf(LCLSalinity,6,4,salinityLCLstring);
-  dtostrf(UCLSalinity,6,4,salinityUCLstring);
-  //Serial.println(salinityReading,6);      
+  dtostrf(UCLSalinity,6,4,salinityUCLstring);    
   LCDSerial.write(254);
   LCDSerial.write(220);
   LCDSerial.write(salinitystring);
@@ -279,7 +271,6 @@ void LCDUpdate() {
 
  void clearScreen()
 {
-  //clears the screen, you will use this a lot!
   LCDSerial.write(0xFE);
   LCDSerial.write(0x01); 
 }
