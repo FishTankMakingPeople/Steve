@@ -157,6 +157,8 @@ void setDeadband() {
 
 void LCDUpdate() {
   clearScreen();
+
+  //Dual Screen
   LCDSerial.write(254);
   LCDSerial.write(128);
   LCDSerial.write("Salt% DI Temp Heat");
@@ -203,7 +205,9 @@ void LCDUpdate() {
   }
   else {
     LCDSerial.write("OFF");
-  } 
+  }
+
+  //Heating Screem
   /*LCDSerial.write(254);
   LCDSerial.write(128);
   LCDSerial.write("  LCL  SetPt");
@@ -230,6 +234,8 @@ void LCDUpdate() {
   else {
     LCDSerial.write("OFF");
   }*/
+
+  //Salinity Screen
   /*LCDSerial.write(254);
   LCDSerial.write(128);
   LCDSerial.write("  LCL  SetPt    UCL");
