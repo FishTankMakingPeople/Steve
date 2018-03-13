@@ -98,7 +98,8 @@ void loop() {
       HeaterOn = true;      
     } 
   else if ( (HeaterOn && millis()-HeatOnTimer >= heaterOnTime)
-  || (HeaterOn && abs(HeaterCurrCycleSetpoint-setpointTemp) >= 0.3) || (HeaterOn && tempReading >= setpointTemp) ) {
+          || (HeaterOn && abs(HeaterCurrCycleSetpoint-setpointTemp) >= 0.3)
+          || (HeaterOn && tempReading >= setpointTemp) ) {
     digitalWrite(heater_power_pin, LOW);
     HeaterOn = false;
   }
