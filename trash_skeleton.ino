@@ -19,7 +19,6 @@ void loop() {
   {
     if (footPressure())
     {
-
       if (infrared())
       {
         openLid();
