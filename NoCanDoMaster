@@ -1,0 +1,143 @@
+#include <Servo.h>
+#include <Wire.h> // Must include Wire library for I2C
+#include <SparkFun_MMA8452Q.h> // Includes the SFE_MMA8452Q library
+
+Servo servoLeft;
+Servo servoRight;
+Servo servoLock;
+MMA8452Q accel;
+
+int buzzer = 8;
+int pressurePin = 5;
+int motionPin = A0;
+int servoLeftPin = 9;
+int servoRightPin = 11;
+int servoLockPin = 6;
+int acceln = 20;
+float PIRThreshold = 2;
+float accelXCalib;
+float accelYCalib;
+float accelZCalib;
+float accelXTolerance = 0.3;
+float accelYTolerance = 0.3;
+float accelZTolerance = 0.2;
+
+void setup() {
+  Serial.begin(9600); 
+  accel.init();
+  float accelX=0; float accelY=0; float accelZ=0;
+  for (int i=1; i<=acceln; i++) {
+    accel.read();
+    accelX = accelX + accel.cx;
+    accelY = accelY + accel.cy;    
+    accelZ = accelZ + accel.cz;    
+  }
+  accelXCalib = accelX/acceln;
+  accelYCalib = accelY/acceln;
+  accelZCalib = accelZ/acceln;      
+}
+
+
+void loop() { 
+  if (level())
+  {
+    noTone(buzzer);
+    if (footPressure())
+    {
+      if (infrared())
+      {
+        openLid();
+        while(footPressure() && level()) {Serial.println("");}
+        closeLid();
+      }
+    }
+  }
+  else {
+    tone(buzzer,1500);
+  }
+  Serial.println("");
+}
+
+  bool footPressure() {
+    if(digitalRead(pressurePin)==HIGH){
+      Serial.print("Foot:T ");
+      return true;
+    }
+    else {
+      Serial.print("Foot:F ");
+      return false;
+    }
+  }
+
+  bool infrared() {
+    float firstReading = analogRead(motionPin);
+    delay(300);
+    float secondReading = analogRead(motionPin);
+    if(secondReading-firstReading>=PIRThreshold) {
+      Serial.print("Infrared:T ");
+      return true;
+    }
+    else {
+      Serial.print("Infrared:F "); Serial.print(" "); Serial.print(firstReading);
+      Serial.print(" "); Serial.print(secondReading);
+      return false;
+    }
+  }
+  
+  void lock() {
+    servoLock.attach(servoLockPin);
+    servoLock.write(78);
+    delay(500);
+    servoLock.detach();
+  }
+  
+  void unlock() {
+    servoLock.attach(servoLockPin);
+    servoLock.write(0);
+    delay(500);
+    servoLock.detach();
+  }
+  
+  void closeLid() {
+    servoRight.attach(servoRightPin);
+    servoLeft.attach(servoLeftPin);
+    servoRight.write(157);
+    servoLeft.write(17);
+    delay(500);
+    servoRight.detach();
+    servoLeft.detach();
+    lock();        
+  }
+  
+  void openLid() {
+    unlock();
+    servoRight.attach(servoRightPin);
+    servoLeft.attach(servoLeftPin);
+    servoRight.write(84);
+    servoLeft.write(163);
+    delay(500);
+    servoRight.detach();
+    servoLeft.detach();          
+  }
+  
+  bool level() {
+    accel.read();
+    float xDiff = accelXCalib-accel.cx;
+    float yDiff = accelYCalib-accel.cy;
+    float zDiff = accelZCalib-accel.cz;
+    if(xDiff>=accelXTolerance || -xDiff>=accelXTolerance || yDiff>=accelYTolerance || -yDiff>=accelYTolerance
+      || zDiff>=accelZTolerance || -zDiff>=accelZTolerance) {
+      delay(50);
+      accel.read();
+      float xDiff = accelXCalib-accel.cx;
+      float yDiff = accelYCalib-accel.cy;
+      float zDiff = accelZCalib-accel.cz;
+      if(xDiff>=accelXTolerance || -xDiff>=accelXTolerance || yDiff>=accelYTolerance || -yDiff>=accelYTolerance
+        || zDiff>=accelZTolerance || -zDiff>=accelZTolerance) {      
+        Serial.print("Level:F ");
+        return false;
+      }
+    }
+    Serial.print("Level:T ");
+    return true; 
+}
